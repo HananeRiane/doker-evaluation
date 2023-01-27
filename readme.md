@@ -32,7 +32,7 @@ On veut pouvoir lancer plusieurs workers pour un seul planner pour parallèliser
 Pour ça il vous faudra modifier le code du planner (la ligne 12) :
 
 ```js
-let workers = ['http://localhost:8080']
+let workers = ["http://localhost:8080"];
 ```
 
 Pour qu'il dispatche les tâches à chaque workers.
