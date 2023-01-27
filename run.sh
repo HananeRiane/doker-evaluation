@@ -1,5 +1,5 @@
-docker network create eval
+docker network create mynetwork
 
-docker run  --network=eval -e PORT=3000   -e ADDRESS=http://planner --name planner -d planner
-
-docker run  --network=eval -e PORT=8080   -e ADDRESS=http://worker --name worker -d worker
+docker run --network=mynetwork --name worker -d eval/worker
+docker run --network=mynetwork --name worker1 -e PORT=8081 -d eval/worker
+docker run --network=mynetwork --name planner -d eval/planner

@@ -1,13 +1,6 @@
-FROM node:16.15.0
-
-WORKDIR /app
-
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+FROM node:16.14.0
 COPY . .
-
-RUN npm install
-
+RUN yarn
+ENV TASKS=4
 EXPOSE 3000
-
 CMD [ "node", "main.js"]
