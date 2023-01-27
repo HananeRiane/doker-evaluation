@@ -45,7 +45,7 @@ const sendTask = async (worker, task) => {
   console.log(`=> ${worker.url}/${task.type}`, task)
   workers = workers.filter((w) => w.id !== worker.id)
   tasks = tasks.filter((t) => t !== task)
-  const request = fetch(`${worker.url}/${task.type}`, {
+  const request = fetch(`${worker.url}:8080/${task.type}`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
