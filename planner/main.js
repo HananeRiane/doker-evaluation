@@ -3,19 +3,20 @@ const fetch = require('node-fetch')
 const express = require('express')
 
 const port = process.env.PORT || 3000
-const nbTasks = parseInt(process.env.TASKS) || 4
+const nbTasks = parseInt(process.env.TASKS) || 20
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min)) + min
 const taskType = () => (randInt(0, 2) ? 'mult' : 'add')
 const args = () => ({ a: randInt(0, 40), b: randInt(0, 40) })
 
 const generateTasks = (i) =>
-  new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
+new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
-  let workers = [
-  { url: 'http://worker:8080', id: '0' },
-  { url: 'http://worker1:8081', id: '1' }
-  ]
+
+let workers = [
+  // { url: 'http://localhost:8080', id: '' }
+]
+
 const app = express()
 app.use(express.json())
 app.use(
@@ -26,13 +27,21 @@ app.use(
 
 app.get('/', (req, res) => {
   res.send(JSON.stringify(workers))
+  console.log(JSON.stringify(workers))
 })
 
 app.post('/register', (req, res) => {
-  const { url, id } = req.body
-  console.log(`Register: adding ${url} worker: ${id}`)
-  workers.push({ url, id })
+  let { url, id, worktype } = req.body;
+  console.log(`Register: adding ${url} workerID: ${id}, worktype: `,worktype)
+  let findWorker = workers.find(w => w.id===id)
+
+  if(!findWorker){
+    workers.push({ url, id, worktype })
+  }
+
   res.send('ok')
+
+  console.log(JSON.stringify(workers))
 })
 
 let tasks = generateTasks(nbTasks)
@@ -42,10 +51,31 @@ const wait = (mili) =>
   new Promise((resolve, reject) => setTimeout(resolve, mili))
 
 const sendTask = async (worker, task) => {
-  console.log(`=> ${worker.url}/${task.type}`, task)
+   // console.log(`=> ${worker.url}/${task.type}`, task)
+
   workers = workers.filter((w) => w.id !== worker.id)
-  tasks = tasks.filter((t) => t !== task)
-  const request = fetch(`${worker.url}:8080/${task.type}`, {
+
+  tasks = tasks.filter((t) => t !== task);
+
+  //console.log('task before sending request', tasks)
+
+
+  if(!worker.worktype){
+    //generalist
+    console.log(`${worker.url}/${task.type}`);
+  }
+  else{
+    if(task.type != worker.worktype){
+      console.log('wrong task continue...')
+      return;
+    }
+  }
+
+
+
+
+
+  const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -54,15 +84,16 @@ const sendTask = async (worker, task) => {
     body: JSON.stringify(task.args),
   })
     .then((res) => {
+
       workers = [...workers, worker]
       return res.json()
     })
     .then((res) => {
       taskToDo -= 1
-      console.log('---')
+      /*console.log('---')
       console.log(nbTasks - taskToDo, '/', nbTasks, ':')
       console.log(task, 'has res', res)
-      console.log('---')
+      console.log('---')*/
       return res
     })
     .catch((err) => {
@@ -72,11 +103,11 @@ const sendTask = async (worker, task) => {
 }
 
 const main = async () => {
-  console.log(tasks)
   while (taskToDo > 0) {
     await wait(100)
     if (workers.length === 0 || tasks.length === 0) continue
     sendTask(workers[0], tasks[0])
+
   }
   console.log('end of tasks')
   server.close()
