@@ -67,7 +67,8 @@ const sendTask = async (worker, task) => {
   else{
     if(task.type != worker.worktype){
       console.log('wrong task continue...')
-      return;
+      task = tasks.find(t => t.type===worker.worktype)
+      console.log('task : ',task)
     }
   }
 
@@ -94,6 +95,7 @@ const sendTask = async (worker, task) => {
       console.log(nbTasks - taskToDo, '/', nbTasks, ':')
       console.log(task, 'has res', res)
       console.log('---')*/
+      console.log('---')
       return res
     })
     .catch((err) => {
