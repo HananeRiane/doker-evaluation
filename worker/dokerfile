@@ -1,0 +1,12 @@
+FROM node:16.15.1
+# Create app directory
+WORKDIR /app
+COPY package.json ./package.json
+COPY package-lock.json ./package-lock.json
+RUN npm install
+COPY . .
+EXPOSE 8081
+CMD [ "node", "index.js"]
+#1 pour copier les docs              :     docker build --tag worker . 
+#2 pour lancer l'image dans le port  :     docker run -p 8081:8081 worke
+#ou executer  => sh build.sh
